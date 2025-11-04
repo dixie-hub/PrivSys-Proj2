@@ -1,6 +1,6 @@
-package pt.unl.fct.pds.project2.utils;
+package pt.unl.fct.pds.utils;
 
-import pt.unl.fct.pds.project2.model.Node;
+import pt.unl.fct.pds.model.Node;
 import java.util.Arrays;
 
 public class ConsensusParser {
