@@ -14,6 +14,17 @@ public class ConsensusParser {
 
     public Node[] parseConsensus() {
         //TODO: Implement! For now just returning null.
+
+        /* STEP 1 
+         *      -> Ler o document e retirar as informações importantes
+         * STEP 2        
+         *      -> Usar uma função de geo location para retirar o pais do relay observado
+         * STEP 3
+         *      -> Criar um objeto Node para guardar as informações dos relays
+         * STEP 4
+         *      -> Colocar tudo numa lista de devolver essa lista
+         */
+        
         return null;
     }
 }
