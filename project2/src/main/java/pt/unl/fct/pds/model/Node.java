@@ -6,6 +6,7 @@ import java.util.Arrays;
 public class Node {
     private String nickname;
     private String fingerprint;
+    private String digest;
     private LocalDateTime timePublished;
     private String ipAddress;
     private int orPort;
@@ -21,6 +22,7 @@ public class Node {
     public Node(
                 String nickname,
                 String fingerprint,
+                String digest,
                 LocalDateTime timePublished,
                 String ipAddress,
                 int orPort,
@@ -33,6 +35,7 @@ public class Node {
     {
         this.nickname = nickname;
         this.fingerprint = fingerprint;
+        this.digest = digest;
         this.timePublished = timePublished;
         this.ipAddress = ipAddress;
         this.orPort = orPort;
@@ -46,6 +49,7 @@ public class Node {
 
     public String getNickname() {return nickname;}
     public String getFingerprint() {return fingerprint;}
+    public String getDigest() {return digest;}
     public LocalDateTime getTimePublished() {return timePublished;}
     public String getIpAddress() {return ipAddress;}
     public int getOrPort() {return orPort;}
@@ -59,6 +63,7 @@ public class Node {
     
     public void setNickname(String nickname) {this.nickname = nickname;}
     public void setFingerprint(String fingerprint) {this.fingerprint = fingerprint;}
+    public void setDigest(String digest) {this.digest = digest;}
     public void setTimePublished(LocalDateTime timePublished) {this.timePublished =timePublished;}
     public void setIpAddress(String ipAddress) {this.ipAddress = ipAddress;}
     public void setOrPort(int orPort) {this.orPort = orPort;}
