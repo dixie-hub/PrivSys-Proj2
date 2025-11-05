@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConsensusParser {
@@ -44,27 +45,25 @@ public class ConsensusParser {
          */
 
         File file = new File("relays.txt");
-        List<Node> relays = new ArrayList<>();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss");
         
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             
             if (!in.ready()) {
-
                 return null;  
             } 
  
-            String line;
+            String line = "";
+            List<Node> relays = new ArrayList<>();
+            Node relay = new Node();
+
             while (!(line = in.readLine()).isEmpty()) {
                 
                 String[] inputTokens = line.split(" ");
-
-                Node relay = new Node();
                 
                 switch (inputTokens[0]) {
                     case "r":
-
                         relay.setNickname(inputTokens[1]);
                         relay.setFingerprint(inputTokens[2]);
                         relay.setDigest(inputTokens[3]);
@@ -72,31 +71,27 @@ public class ConsensusParser {
                         relay.setIpAddress(inputTokens[4]);
                         relay.setOrPort(Integer.parseInt(inputTokens[4]));
                         relay.setDirPort(Integer.parseInt(inputTokens[5]));
-
                         break;
                     case "a":
-                        //TODO
+                        relay.setIpv6Address(inputTokens[1]);
                         break;
                     case "s":
-
-                        List<String> flags = new ArrayList<>();
-                        for (String flag : inputTokens){
-                            flags.add(flag);
-                        }
-                        relay.setFlags(flags.toArray(new String[0]));
-                
+                        String[] flags = Arrays.copyOfRange(inputTokens, 1, inputTokens.length);
+                        relay.setFlags(flags);
                         break;
                     case "v":
                         relay.setVersion(inputTokens[2]);
                         break;
                     case "pr":
-                        //TODO
+                        //Not needed for the project
                         break;
                     case "w":
-                        //TODO
+                        relay.setBandwidth(Integer.valueOf(inputTokens[1].split("=")[1]));
                         break;
                     case "p":
-                        //TODO
+                        relay.setExitPolicy(inputTokens[1]+inputTokens[2]);
+                        relays.add(relay);
+                        relay = new Node();
                         break;
                     default:
                         System.out.println("Invalid input.");

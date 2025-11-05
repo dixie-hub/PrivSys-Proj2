@@ -16,6 +16,7 @@ public class Node {
     private int bandwidth;
     private String country;
     private String exitPolicy;
+    private String ipv6Address;
 
     public Node() {}
 
@@ -31,7 +32,8 @@ public class Node {
                 String version,
                 int bandwidth,
                 String country,
-                String exitPolicy)
+                String exitPolicy,
+                String ipv6Address)
     {
         this.nickname = nickname;
         this.fingerprint = fingerprint;
@@ -45,6 +47,7 @@ public class Node {
         this.bandwidth = bandwidth;
         this.country = country;
         this.exitPolicy = exitPolicy;
+        this.ipv6Address = ipv6Address;
     }
 
     public String getNickname() {return nickname;}
@@ -59,6 +62,7 @@ public class Node {
     public int getBandwidth() {return bandwidth;}
     public String getCountry() {return country;}
     public String getExitPolicy() {return exitPolicy;}
+    public String getIpv6Address() {return ipv6Address;}
 
     
     public void setNickname(String nickname) {this.nickname = nickname;}
@@ -73,4 +77,5 @@ public class Node {
     public void setBandwidth(int bandwidth) {this.bandwidth = bandwidth;}
     public void setCountry(String country) {this.country = country;}
     public void setExitPolicy(String exitPolicy) {this.exitPolicy = exitPolicy;}
+    public void setIpv6Address(String ipv6Address) {this.ipv6Address = ipv6Address;}
 }
