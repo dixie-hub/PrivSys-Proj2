@@ -2,25 +2,34 @@ package pt.unl.fct.pds.utils;
 
 import pt.unl.fct.pds.model.Node;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.io.BufferedReader;
 import java.io.FileReader;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
+import com.maxmind.geoip2.model.CityResponse;
+
 public class ConsensusParser {
     String filename;
+    private final DatabaseReader dbReader;
 
-    public ConsensusParser() {
+    public ConsensusParser() throws IOException {
+        File database = new File("GeoLite2-City.mmdb");
+        this.dbReader = new DatabaseReader.Builder(database).build();
     }
 
-    public ConsensusParser(String filename) {
+    public ConsensusParser(String filename) throws IOException {
         this.filename = filename;
+        File database = new File("GeoLite2-City.mmdb");
+        this.dbReader = new DatabaseReader.Builder(database).build();
     }
 
     public String getFilename() {
@@ -31,7 +40,7 @@ public class ConsensusParser {
         this.filename = filename;
     }
 
-    public Node[] parseConsensus() {
+    public List<Node> parseConsensus() {
         //TODO: Implement! For now just returning null.
 
         /* STEP 1 
@@ -68,9 +77,15 @@ public class ConsensusParser {
                         relay.setFingerprint(inputTokens[2]);
                         relay.setDigest(inputTokens[3]);
                         relay.setTimePublished(LocalDateTime.parse(inputTokens[4]+inputTokens[5], formatter));
-                        relay.setIpAddress(inputTokens[4]);
-                        relay.setOrPort(Integer.parseInt(inputTokens[4]));
-                        relay.setDirPort(Integer.parseInt(inputTokens[5]));
+                        relay.setIpAddress(inputTokens[6]);
+                        
+                        //Colocar pais de origem
+                        InetAddress ipAddress = InetAddress.getByName(inputTokens[6]);
+                        CityResponse response = dbReader.city(ipAddress);
+                        relay.setCountry(response.getCountry().getName());
+
+                        relay.setOrPort(Integer.parseInt(inputTokens[7]));
+                        relay.setDirPort(Integer.parseInt(inputTokens[8]));
                         break;
                     case "a":
                         relay.setIpv6Address(inputTokens[1]);
@@ -98,11 +113,14 @@ public class ConsensusParser {
                         break;
                 }
             }
+
+        return relays;
+
         } catch (Exception e) {
             System.out.println("File unable to read.");
             e.printStackTrace();
+            return null;
         }
 
-        return null;
     }
 }
