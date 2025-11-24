@@ -11,19 +11,23 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 
 public class ConsensusParser {
-    String filename;
+    private String filename;
     private final DatabaseReader dbReader;
+    private Map<String, List<Node>> flagMap;
 
     public ConsensusParser() throws IOException {
         File database = new File("GeoLite2-City.mmdb");
         this.dbReader = new DatabaseReader.Builder(database).build();
+        this.flagMap = new HashMap<>();
     }
 
     public ConsensusParser(String filename) throws IOException {
@@ -41,45 +45,46 @@ public class ConsensusParser {
     }
 
     public List<Node> parseConsensus() {
-        //TODO: Implement! For now just returning null.
+        // TODO: Implement! For now just returning null.
 
-        /* STEP 1 
-         *      -> Ler o document e retirar as informações importantes
-         * STEP 2        
-         *      -> Usar uma função de geo location para retirar o pais do relay observado
+        /*
+         * STEP 1
+         * -> Ler o document e retirar as informações importantes
+         * STEP 2
+         * -> Usar uma função de geo location para retirar o pais do relay observado
          * STEP 3
-         *      -> Criar um objeto Node para guardar as informações dos relays
+         * -> Criar um objeto Node para guardar as informações dos relays
          * STEP 4
-         *      -> Colocar tudo numa lista de devolver essa lista
+         * -> Colocar tudo numa lista de devolver essa lista
          */
 
         File file = new File("relays.txt");
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss");
-        
+
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            
+
             if (!in.ready()) {
-                return null;  
-            } 
- 
+                return null;
+            }
+
             String line = "";
             List<Node> relays = new ArrayList<>();
             Node relay = new Node();
 
-            while (!(line = in.readLine()).isEmpty()) {
-                
+            while (!((line = in.readLine()).isEmpty())) {
+
                 String[] inputTokens = line.split(" ");
-                
+
                 switch (inputTokens[0]) {
                     case "r":
                         relay.setNickname(inputTokens[1]);
                         relay.setFingerprint(inputTokens[2]);
                         relay.setDigest(inputTokens[3]);
-                        relay.setTimePublished(LocalDateTime.parse(inputTokens[4]+inputTokens[5], formatter));
+                        relay.setTimePublished(LocalDateTime.parse(inputTokens[4] + inputTokens[5], formatter));
                         relay.setIpAddress(inputTokens[6]);
-                        
-                        //Colocar pais de origem
+
+                        // Colocar pais de origem
                         InetAddress ipAddress = InetAddress.getByName(inputTokens[6]);
                         CityResponse response = dbReader.city(ipAddress);
                         relay.setCountry(response.getCountry().getName());
@@ -93,18 +98,26 @@ public class ConsensusParser {
                     case "s":
                         String[] flags = Arrays.copyOfRange(inputTokens, 1, inputTokens.length);
                         relay.setFlags(flags);
+                        for (String flag : flags) {
+                            List<Node> nodesWithFlag = flagMap.get(flag);
+                            if (!flagMap.containsKey(flag))
+                                nodesWithFlag = new ArrayList<>();
+                            
+                            nodesWithFlag.add(relay);
+                            flagMap.put(flag, nodesWithFlag);
+                        }
                         break;
                     case "v":
                         relay.setVersion(inputTokens[2]);
                         break;
                     case "pr":
-                        //Not needed for the project
+                        // Not needed for the project
                         break;
                     case "w":
                         relay.setBandwidth(Integer.valueOf(inputTokens[1].split("=")[1]));
                         break;
                     case "p":
-                        relay.setExitPolicy(inputTokens[1]+inputTokens[2]);
+                        relay.setExitPolicy(inputTokens[1] + inputTokens[2]);
                         relays.add(relay);
                         relay = new Node();
                         break;
@@ -114,7 +127,7 @@ public class ConsensusParser {
                 }
             }
 
-        return relays;
+            return relays;
 
         } catch (Exception e) {
             System.out.println("File unable to read.");
@@ -122,5 +135,9 @@ public class ConsensusParser {
             return null;
         }
 
+    }
+
+    public List<Node> filterByFlag(String flag) {
+        return flagMap.get(flag);
     }
 }
