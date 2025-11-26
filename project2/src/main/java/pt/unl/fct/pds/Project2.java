@@ -1,11 +1,8 @@
 package pt.unl.fct.pds;
 
-import pt.unl.fct.pds.model.Node;
+import pt.unl.fct.pds.pathSelectors.AdvancedSelector;
 import pt.unl.fct.pds.pathSelectors.SimpleSelector;
 
-import java.io.IOException;
-
-import pt.unl.fct.pds.model.Circuit;
 import pt.unl.fct.pds.utils.ConsensusParser;
 
 
@@ -15,7 +12,6 @@ import pt.unl.fct.pds.utils.ConsensusParser;
  */
 public class Project2 
 {
-    private static Node[] relays;
 
     public static void main( String[] args )
     {
@@ -24,10 +20,11 @@ public class Project2
 
         try {
             ConsensusParser parser = new ConsensusParser();
-            relays = (Node[]) parser.parseConsensus().toArray();
 
-            SimpleSelector selector = new SimpleSelector(relays, parser);
-            System.out.println("First circuit: " + selector.selectPath().toString());
+            SimpleSelector simpleSelector = new SimpleSelector(parser);
+            System.out.println("First circuit: " + simpleSelector.selectPath().toString());
+            AdvancedSelector advancedSelector = new AdvancedSelector(parser);
+            System.out.println("Second circuit: " + advancedSelector.selectPath().toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

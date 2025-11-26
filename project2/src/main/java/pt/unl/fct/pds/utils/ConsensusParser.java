@@ -25,14 +25,15 @@ public class ConsensusParser {
     private Map<String, List<Node>> flagMap;
 
     public ConsensusParser() throws IOException {
-        File database = new File("GeoLite2-City.mmdb");
+        File database = new File("pt/unl/fct/pds/data/GeoLite2-City.mmdb");
+        //Class<? extends ConsensusParser> database = getClass().getClassLoader().getResourceAsStream("pt/unl/fct/pds/data/GeoLite2-City.mmdb");
         this.dbReader = new DatabaseReader.Builder(database).build();
         this.flagMap = new HashMap<>();
     }
 
     public ConsensusParser(String filename) throws IOException {
         this.filename = filename;
-        File database = new File("GeoLite2-City.mmdb");
+        File database = new File("data/GeoLite2-City.mmdb");
         this.dbReader = new DatabaseReader.Builder(database).build();
     }
 
@@ -139,5 +140,12 @@ public class ConsensusParser {
 
     public List<Node> filterByFlag(String flag) {
         return flagMap.get(flag);
+    }
+
+    public boolean sameSubnet(Node first, Node second) {
+        String[] firstIP = first.getIpAddress().split("\\.");
+        String[] secondIP = second.getIpAddress().split("\\.");
+
+        return firstIP[0].equals(secondIP[0]) && firstIP[1].equals(secondIP[1]);
     }
 }

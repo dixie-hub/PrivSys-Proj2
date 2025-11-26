@@ -7,40 +7,45 @@ import pt.unl.fct.pds.utils.ConsensusParser;
 
 public class SimpleSelector {
 
-    public Node[] relays;
     public ConsensusParser parser;
 
-    public SimpleSelector(Node[] relays, ConsensusParser parser) {
-        this.relays = relays;
+    private Node exit;
+    private Node guard;
+    private Node middle;
+
+    public SimpleSelector(ConsensusParser parser) {
         this.parser = parser;
     }
 
     public Node[] selectPath() {
-        Node exit = selectExit();
-        Node guard = selectGuard();
-        Node middle = selectMiddle();
+        exit = selectExit();
+        guard = selectGuard();
+        middle = selectMiddle();
 
         return new Node[] { exit, guard, middle };
     }
 
     private Node selectExit() {
         List<Node> fastNodes = parser.filterByFlag("Fast");
-        //TODO: remove those witout suitable exit policy
+        fastNodes.removeIf(node -> !node.getExitPolicy().contains("accept"));
 
         return sampleByWeight(fastNodes);
     }
 
     private Node selectGuard() {
         List<Node> guardNodes = parser.filterByFlag("Guard");
-        //TODO: remove those with the same family and 16 subnet as exit
-        //TODO: Prioritize relays from persistent SAMPLED GUARDS and CONFIRMED GUARDS sets
-        
+        // TODO: remove those with the same family
+        guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
+        // TODO: Prioritize relays from persistent SAMPLED GUARDS and CONFIRMED GUARDS
+        // sets
+
         return sampleByWeight(guardNodes);
     }
 
     private Node selectMiddle() {
         List<Node> fastNodes = parser.filterByFlag("Fast");
-        //TODO: Filter relays to remove those with the same family and 16 subnet as the exit and guard
+        // TODO: Filter relays to remove those with the same family
+        fastNodes.removeIf(node -> parser.sameSubnet(node, exit) || parser.sameSubnet(node, guard));
 
         return sampleByWeight(fastNodes);
     }
