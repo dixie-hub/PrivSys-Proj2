@@ -1,5 +1,6 @@
 package pt.unl.fct.pds.pathSelectors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import pt.unl.fct.pds.model.Node;
@@ -8,27 +9,36 @@ import pt.unl.fct.pds.utils.ConsensusParser;
 public class SimpleSelector {
 
     public ConsensusParser parser;
+    private List<Node> consensus;
 
     private Node exit;
     private Node guard;
     private Node middle;
 
-    public SimpleSelector(ConsensusParser parser) {
+    public SimpleSelector(List<Node> consensus, ConsensusParser parser) {
+        this.consensus = consensus;
         this.parser = parser;
     }
 
-    public Node[] selectPath() {
-        exit = selectExit();
-        guard = selectGuard();
-        middle = selectMiddle();
+    public List<Node> selectPath() {
+        List<Node> pathSelected = new ArrayList<>();
 
-        return new Node[] { exit, guard, middle };
+        exit = selectExit();
+        pathSelected.add(exit);
+
+        guard = selectGuard();
+        pathSelected.add(guard);
+
+        middle = selectMiddle();
+        pathSelected.add(middle);
+
+
+        return pathSelected;
     }
 
     private Node selectExit() {
         List<Node> fastNodes = parser.filterByFlag("Fast");
         fastNodes.removeIf(node -> !node.getExitPolicy().contains("accept"));
-
         return sampleByWeight(fastNodes);
     }
 
@@ -59,7 +69,7 @@ public class SimpleSelector {
         Node heaviest = null;
         double bestWeight = 0.0;
         for (Node node : nodes) {
-            double currWeight = node.getBandwidth() / totalWeight;
+            double currWeight = (double) node.getBandwidth() / (double) totalWeight;
             if (currWeight > bestWeight) {
                 bestWeight = currWeight;
                 heaviest = node;

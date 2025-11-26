@@ -4,7 +4,10 @@ import pt.unl.fct.pds.model.Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 
@@ -25,15 +29,22 @@ public class ConsensusParser {
     private Map<String, List<Node>> flagMap;
 
     public ConsensusParser() throws IOException {
-        File database = new File("pt/unl/fct/pds/data/GeoLite2-City.mmdb");
-        //Class<? extends ConsensusParser> database = getClass().getClassLoader().getResourceAsStream("pt/unl/fct/pds/data/GeoLite2-City.mmdb");
+        //File database = new File("resources/GeoLite2-City.mmdb");
+        InputStream database = getClass()
+            .getClassLoader()
+            .getResourceAsStream("GeoLite2-City.mmdb");
+
         this.dbReader = new DatabaseReader.Builder(database).build();
         this.flagMap = new HashMap<>();
     }
 
     public ConsensusParser(String filename) throws IOException {
         this.filename = filename;
-        File database = new File("data/GeoLite2-City.mmdb");
+        //File database = new File("resources/GeoLite2-City.mmdb");
+        InputStream database = getClass()
+            .getClassLoader()
+            .getResourceAsStream("GeoLite2-City.mmdb");
+
         this.dbReader = new DatabaseReader.Builder(database).build();
     }
 
@@ -46,7 +57,6 @@ public class ConsensusParser {
     }
 
     public List<Node> parseConsensus() {
-        // TODO: Implement! For now just returning null.
 
         /*
          * STEP 1
@@ -59,11 +69,11 @@ public class ConsensusParser {
          * -> Colocar tudo numa lista de devolver essa lista
          */
 
-        File file = new File("relays.txt");
+        InputStream file = getClass().getClassLoader().getResourceAsStream("relays.txt");
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss");
 
-        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8))) {
 
             if (!in.ready()) {
                 return null;
@@ -73,59 +83,65 @@ public class ConsensusParser {
             List<Node> relays = new ArrayList<>();
             Node relay = new Node();
 
-            while (!((line = in.readLine()).isEmpty())) {
+            try {
+                
+                while (!((line = in.readLine()).isEmpty())) {
 
-                String[] inputTokens = line.split(" ");
+                    String[] inputTokens = line.split(" ");
 
-                switch (inputTokens[0]) {
-                    case "r":
-                        relay.setNickname(inputTokens[1]);
-                        relay.setFingerprint(inputTokens[2]);
-                        relay.setDigest(inputTokens[3]);
-                        relay.setTimePublished(LocalDateTime.parse(inputTokens[4] + inputTokens[5], formatter));
-                        relay.setIpAddress(inputTokens[6]);
+                    switch (inputTokens[0]) {
+                        case "r":
+                            relay.setNickname(inputTokens[1]);
+                            relay.setFingerprint(inputTokens[2]);
+                            relay.setDigest(inputTokens[3]);
+                            relay.setTimePublished(LocalDateTime.parse(inputTokens[4] + inputTokens[5], formatter));
+                            relay.setIpAddress(inputTokens[6]);
 
-                        // Colocar pais de origem
-                        InetAddress ipAddress = InetAddress.getByName(inputTokens[6]);
-                        CityResponse response = dbReader.city(ipAddress);
-                        relay.setCountry(response.getCountry().getName());
+                            // Colocar pais de origem
+                            InetAddress ipAddress = InetAddress.getByName(inputTokens[6]);
+                            CityResponse response = dbReader.city(ipAddress);
+                            relay.setCountry(response.getCountry().getName());
 
-                        relay.setOrPort(Integer.parseInt(inputTokens[7]));
-                        relay.setDirPort(Integer.parseInt(inputTokens[8]));
-                        break;
-                    case "a":
-                        relay.setIpv6Address(inputTokens[1]);
-                        break;
-                    case "s":
-                        String[] flags = Arrays.copyOfRange(inputTokens, 1, inputTokens.length);
-                        relay.setFlags(flags);
-                        for (String flag : flags) {
-                            List<Node> nodesWithFlag = flagMap.get(flag);
-                            if (!flagMap.containsKey(flag))
-                                nodesWithFlag = new ArrayList<>();
-                            
-                            nodesWithFlag.add(relay);
-                            flagMap.put(flag, nodesWithFlag);
-                        }
-                        break;
-                    case "v":
-                        relay.setVersion(inputTokens[2]);
-                        break;
-                    case "pr":
-                        // Not needed for the project
-                        break;
-                    case "w":
-                        relay.setBandwidth(Integer.valueOf(inputTokens[1].split("=")[1]));
-                        break;
-                    case "p":
-                        relay.setExitPolicy(inputTokens[1] + inputTokens[2]);
-                        relays.add(relay);
-                        relay = new Node();
-                        break;
-                    default:
-                        System.out.println("Invalid input.");
-                        break;
+                            relay.setOrPort(Integer.parseInt(inputTokens[7]));
+                            relay.setDirPort(Integer.parseInt(inputTokens[8]));
+                            break;
+                        case "a":
+                            relay.setIpv6Address(inputTokens[1]);
+                            break;
+                        case "s":
+                            String[] flags = Arrays.copyOfRange(inputTokens, 1, inputTokens.length);
+                            relay.setFlags(flags);
+                            for (String flag : flags) {
+                                List<Node> nodesWithFlag = flagMap.get(flag);
+                                if (!flagMap.containsKey(flag))
+                                    nodesWithFlag = new ArrayList<>();
+                                
+                                nodesWithFlag.add(relay);
+                                flagMap.put(flag, nodesWithFlag);
+                            }
+                            break;
+                        case "v":
+                            relay.setVersion(inputTokens[2]);
+                            break;
+                        case "pr":
+                            // Not needed for the project
+                            break;
+                        case "w":
+                            relay.setBandwidth(Integer.valueOf(inputTokens[1].split("=")[1]));
+                            break;
+                        case "p":
+                            relay.setExitPolicy(inputTokens[1] + inputTokens[2]);
+                            relays.add(relay);
+                            relay = new Node();
+                            break;
+                        default:
+                            System.out.println("Invalid input.");
+                            break;
+                    }
                 }
+
+            } catch (AddressNotFoundException e) {
+                relay.setCountry("unknown");
             }
 
             return relays;
@@ -135,7 +151,6 @@ public class ConsensusParser {
             e.printStackTrace();
             return null;
         }
-
     }
 
     public List<Node> filterByFlag(String flag) {

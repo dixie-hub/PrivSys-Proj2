@@ -1,4 +1,5 @@
 package pt.unl.fct.pds.pathSelectors;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +25,22 @@ public class AdvancedSelector {
         beta = 0.1;
     }
 
-    public Node[] selectPath() {
+    public List<Node> selectPath() {
 
         weight = new HashMap<>();
 
-        exit = selectExit();
-        guard = selectGuard();
-        middle = selectMiddle();
+        List<Node> pathSelected = new ArrayList<>();
 
-        return new Node[] { exit, guard, middle };
+        exit = selectExit();
+        pathSelected.add(exit);
+
+        guard = selectGuard();
+        pathSelected.add(guard);
+
+        middle = selectMiddle();
+        pathSelected.add(middle);
+
+        return pathSelected;
     }
 
     private Node selectExit() {

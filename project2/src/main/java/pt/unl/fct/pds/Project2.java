@@ -1,5 +1,8 @@
 package pt.unl.fct.pds;
 
+import java.util.List;
+
+import pt.unl.fct.pds.model.Node;
 import pt.unl.fct.pds.pathSelectors.AdvancedSelector;
 import pt.unl.fct.pds.pathSelectors.SimpleSelector;
 
@@ -16,15 +19,28 @@ public class Project2
     public static void main( String[] args )
     {
         // Here we write our logic to choose circuits!
-        System.out.println("Welcome to the Circuit Simulator!");
+        System.out.println("\nWelcome to the Circuit Simulator!\n");
 
         try {
             ConsensusParser parser = new ConsensusParser();
+            List<Node> consensus = parser.parseConsensus();
 
-            SimpleSelector simpleSelector = new SimpleSelector(parser);
-            System.out.println("First circuit: " + simpleSelector.selectPath().toString());
+            SimpleSelector simpleSelector = new SimpleSelector(consensus, parser);
+
+            System.out.println(" First circuit: " );
+            List<Node> simpleSelectorRelays = simpleSelector.selectPath();
+            for( Node n : simpleSelectorRelays){
+                System.out.println("-> " + n.getNickname());
+            }
+            
             AdvancedSelector advancedSelector = new AdvancedSelector(parser);
-            System.out.println("Second circuit: " + advancedSelector.selectPath().toString());
+
+            System.out.println("\n Second circuit: " );
+            List<Node> advancedSelectorRelays = advancedSelector.selectPath();
+            for( Node n : advancedSelectorRelays){
+                System.out.println("-> " + n.getNickname());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
