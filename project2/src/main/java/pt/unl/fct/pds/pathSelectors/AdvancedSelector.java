@@ -114,7 +114,7 @@ public class AdvancedSelector {
         double cummWeigth = 0.0;
 
         for (Node node : nodes){
-            cummWeigth += node.getBandwidth();
+            cummWeigth += weight.get(node);
             if(cummWeigth > rWeigth){
                 return node;
             }
