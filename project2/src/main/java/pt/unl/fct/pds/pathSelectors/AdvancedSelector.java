@@ -47,10 +47,10 @@ public class AdvancedSelector {
         List<Node> fastNodes = parser.filterByFlag("Fast");
         fastNodes.removeIf(node -> !node.getExitPolicy().contains("accept"));
 
-        double totalWeight = 0;
+        double totalWeight = 0.0;
         double currWeight = 0.0;
         for (Node node : fastNodes) {
-            currWeight = node.getBandwidth() + 0.0;
+            currWeight = (double) node.getBandwidth();
             
             totalWeight += currWeight;
             weight.put(node, currWeight);
@@ -70,7 +70,7 @@ public class AdvancedSelector {
             if (!node.getCountry().equals(exit.getCountry())) 
                 currWeight = node.getBandwidth() * (1 + ALPHA);   
             else 
-                currWeight = node.getBandwidth() + 0.0;
+                currWeight = (double) node.getBandwidth();
             
             totalWeight += currWeight;
             weight.put(node, currWeight);
@@ -87,12 +87,13 @@ public class AdvancedSelector {
         double totalWeight = 0.0;
         double currWeight = 0.0;
         int c = 0;
+        String guardCountry = guard.getCountry();
+        String exitCountry = exit.getCountry();
+        
         for (Node node : fastNodes) {
-            String guardCountry = guard.getCountry();
-            String exitCountry = exit.getCountry();
             String nodeCountry = node.getCountry();
 
-            if (!nodeCountry.equals(guardCountry) && !guardCountry.equals(exitCountry)) //isto esta certo?
+            if (!nodeCountry.equals(guardCountry) && !guardCountry.equals(exitCountry) && !nodeCountry.equals(exitCountry))
                 c = 3;
             else if (!nodeCountry.equals(guardCountry) || !nodeCountry.equals(exitCountry))
                 c = 2;
@@ -108,9 +109,9 @@ public class AdvancedSelector {
 
     private Node sampleByWeight(List<Node> nodes, double totalWeight) {
         
-        int rWeigth = random.nextInt((int) totalWeight);
+        double rWeigth = random.nextDouble(totalWeight);
 
-        int cummWeigth = 0;
+        double cummWeigth = 0.0;
 
         for (Node node : nodes){
             cummWeigth += node.getBandwidth();
