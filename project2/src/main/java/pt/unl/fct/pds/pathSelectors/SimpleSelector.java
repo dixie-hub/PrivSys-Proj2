@@ -2,6 +2,7 @@ package pt.unl.fct.pds.pathSelectors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import pt.unl.fct.pds.model.Node;
 import pt.unl.fct.pds.utils.ConsensusParser;
@@ -14,10 +15,12 @@ public class SimpleSelector {
     private Node exit;
     private Node guard;
     private Node middle;
+    private Random random;
 
     public SimpleSelector(List<Node> consensus, ConsensusParser parser) {
         this.consensus = consensus;
         this.parser = parser;
+        this.random = new Random();
     }
 
     public List<Node> selectPath() {
@@ -64,15 +67,16 @@ public class SimpleSelector {
             totalWeight += node.getBandwidth();
         }
 
-        Node heaviest = null;
-        double bestWeight = 0.0;
-        for (Node node : nodes) {
-            double currWeight = (double) node.getBandwidth() / (double) totalWeight;
-            if (currWeight > bestWeight) {
-                bestWeight = currWeight;
-                heaviest = node;
+        int rWeigth = random.nextInt(totalWeight);
+
+        int cummWeigth = 0;
+
+        for (Node node : nodes){
+            cummWeigth += node.getBandwidth();
+            if(cummWeigth > rWeigth){
+                return node;
             }
         }
-        return heaviest;
+        return null;
     }
 }

@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import pt.unl.fct.pds.model.Node;
 import pt.unl.fct.pds.utils.ConsensusParser;
@@ -13,6 +14,7 @@ public class AdvancedSelector {
     public Node exit;
     public Node guard;
     public Node middle;
+    private Random random;
     
     private Map<Node, Double> weight;
     private static Double ALPHA = 0.1;
@@ -20,6 +22,7 @@ public class AdvancedSelector {
 
     public AdvancedSelector(ConsensusParser parser) {
         this.parser = parser;
+        this.random = new Random();
     }
 
     public List<Node> selectPath() {
@@ -104,17 +107,17 @@ public class AdvancedSelector {
     }
 
     private Node sampleByWeight(List<Node> nodes, double totalWeight) {
-        Node heaviest = null;
-        double bestWeight = 0.0;
-        for (Node node : nodes) {
-
-            double nodeWeight = weight.get(node) / totalWeight;
-            if (nodeWeight > bestWeight) {
-                bestWeight = nodeWeight;
-                heaviest = node;
-            }
         
+        int rWeigth = random.nextInt((int) totalWeight);
+
+        int cummWeigth = 0;
+
+        for (Node node : nodes){
+            cummWeigth += node.getBandwidth();
+            if(cummWeigth > rWeigth){
+                return node;
+            }
         }
-        return heaviest;
+        return null;
     }
 }
