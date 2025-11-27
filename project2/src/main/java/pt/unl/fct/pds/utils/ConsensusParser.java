@@ -2,14 +2,12 @@ package pt.unl.fct.pds.utils;
 
 import pt.unl.fct.pds.model.Node;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,40 +18,20 @@ import java.util.Map;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 
 public class ConsensusParser {
-    private String filename;
+    private static String FILE_NAME = "relays.txt";
     private final DatabaseReader dbReader;
     private Map<String, List<Node>> flagMap;
 
     public ConsensusParser() throws IOException {
-        //File database = new File("resources/GeoLite2-City.mmdb");
         InputStream database = getClass()
             .getClassLoader()
             .getResourceAsStream("GeoLite2-City.mmdb");
 
         this.dbReader = new DatabaseReader.Builder(database).build();
         this.flagMap = new HashMap<>();
-    }
-
-    public ConsensusParser(String filename) throws IOException {
-        this.filename = filename;
-        //File database = new File("resources/GeoLite2-City.mmdb");
-        InputStream database = getClass()
-            .getClassLoader()
-            .getResourceAsStream("GeoLite2-City.mmdb");
-
-        this.dbReader = new DatabaseReader.Builder(database).build();
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
     }
 
     public List<Node> parseConsensus() {
@@ -69,7 +47,7 @@ public class ConsensusParser {
          * -> Colocar tudo numa lista de devolver essa lista
          */
 
-        InputStream file = getClass().getClassLoader().getResourceAsStream("relays.txt");
+        InputStream file = getClass().getClassLoader().getResourceAsStream(FILE_NAME);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss");
 

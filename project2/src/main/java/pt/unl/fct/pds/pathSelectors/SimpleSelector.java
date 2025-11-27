@@ -46,8 +46,6 @@ public class SimpleSelector {
         List<Node> guardNodes = parser.filterByFlag("Guard");
         // TODO: remove those with the same family
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
-        // TODO: Prioritize relays from persistent SAMPLED GUARDS and CONFIRMED GUARDS
-        // sets
 
         return sampleByWeight(guardNodes);
     }

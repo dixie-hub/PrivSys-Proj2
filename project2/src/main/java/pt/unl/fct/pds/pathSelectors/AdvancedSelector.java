@@ -15,14 +15,11 @@ public class AdvancedSelector {
     public Node middle;
     
     private Map<Node, Double> weight;
-    private Double alpha; // TODO: parse from document
-    private Double beta; // TODO: parse from document
+    private static Double ALPHA = 0.1;
+    private static Double BETA = 0.1; 
 
     public AdvancedSelector(ConsensusParser parser) {
         this.parser = parser;
-
-        alpha = 0.1;
-        beta = 0.1;
     }
 
     public List<Node> selectPath() {
@@ -64,14 +61,11 @@ public class AdvancedSelector {
         // TODO: remove those with the same family
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
 
-        // TODO: Prioritize relays from persistent SAMPLED GUARDS and CONFIRMED GUARDS
-        // sets
-
         double totalWeight = 0.0;
         double currWeight = 0.0;
         for (Node node : guardNodes) {
             if (!node.getCountry().equals(exit.getCountry())) 
-                currWeight = node.getBandwidth() * (1 + alpha);   
+                currWeight = node.getBandwidth() * (1 + ALPHA);   
             else 
                 currWeight = node.getBandwidth() + 0.0;
             
@@ -102,7 +96,7 @@ public class AdvancedSelector {
             else
                 c = 1;
 
-            currWeight = node.getBandwidth() * (1 + (beta * c));
+            currWeight = node.getBandwidth() * (1 + (BETA * c));
             totalWeight += currWeight;           
             weight.put(node, currWeight);
         }
@@ -113,11 +107,13 @@ public class AdvancedSelector {
         Node heaviest = null;
         double bestWeight = 0.0;
         for (Node node : nodes) {
+
             double nodeWeight = weight.get(node) / totalWeight;
             if (nodeWeight > bestWeight) {
                 bestWeight = nodeWeight;
                 heaviest = node;
             }
+        
         }
         return heaviest;
     }
