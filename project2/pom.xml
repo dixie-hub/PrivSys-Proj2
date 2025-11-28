@@ -55,5 +55,31 @@
             <artifactId>geoip2</artifactId>
             <version>4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.torproject</groupId>
+            <artifactId>metrics-lib</artifactId>
+            <version>2.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.16.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tukaani</groupId>
+            <artifactId>xz</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+
     </dependencies>
 </project>

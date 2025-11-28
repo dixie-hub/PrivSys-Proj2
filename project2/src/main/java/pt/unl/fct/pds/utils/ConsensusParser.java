@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,8 @@ import java.util.Map;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.model.CityResponse;
+
+import org.torproject.descriptor.*;
 
 public class ConsensusParser {
     private static String FILE_NAME = "relays.txt";
@@ -32,9 +36,44 @@ public class ConsensusParser {
 
         this.dbReader = new DatabaseReader.Builder(database).build();
         this.flagMap = new HashMap<>();
+
+         DescriptorCollector descriptorCollector =
+            DescriptorSourceFactory.createDescriptorCollector();
+            descriptorCollector.collectDescriptors(
+            // Download from Tor's main CollecTor instance,
+            "https://collector.torproject.org",
+            // include network status consensuses and relay server descriptors
+            new String[] { "/recent/relay-descriptors/consensuses/",
+            "/recent/relay-descriptors/server-descriptors/" },
+            // regardless of last-modified time,
+            0L,
+            // write to the local directory called in/,
+            new File("in"),
+            // and delete extraneous files that do not exist remotely anymore.
+            true);
+
     }
 
     public List<Node> parseConsensus() {
+
+        DescriptorReader descriptorReader = DescriptorSourceFactory.createDescriptorReader();
+
+        Map<String, List<String>> fingerprintToFamily = new HashMap<>();
+
+        for (Descriptor descriptor : descriptorReader.readDescriptors(new File("in"))) {
+            // Only process network status consensuses, ignore the rest.
+            if ((descriptor instanceof RelayServerDescriptor)) {
+                RelayServerDescriptor  rsd  = (RelayServerDescriptor ) descriptor;
+                
+                String fingerprintHex = rsd.getFingerprint(); 
+                System.out.println(fingerprintHex);
+                List<String> family = rsd.getFamilyEntries();   
+
+                fingerprintToFamily.put(fingerprintHex, family);
+            }
+        }
+
+
 
         /*
          * STEP 1
@@ -109,6 +148,13 @@ public class ConsensusParser {
                             break;
                         case "p":
                             relay.setExitPolicy(inputTokens[1] + inputTokens[2]);
+
+                            //Adicionar a Familia
+                            String hexFingerprint = base64ToHexFingerprint(relay.getFingerprint());
+                            List<String> family = fingerprintToFamily.get(hexFingerprint);
+
+                            relay.setFamily(family);
+
                             relays.add(relay);
                             relay = new Node();
                             break;
@@ -141,4 +187,15 @@ public class ConsensusParser {
 
         return firstIP[0].equals(secondIP[0]) && firstIP[1].equals(secondIP[1]);
     }
+
+    private static String base64ToHexFingerprint(String b64) {
+        byte[] bytes = Base64.getDecoder().decode(b64);
+        StringBuilder sb = new StringBuilder();
+
+        for (byte b : bytes) {
+            sb.append(String.format("%02X", b));
+        }
+
+    return sb.toString(); // 40-char uppercase hex
+}
 }

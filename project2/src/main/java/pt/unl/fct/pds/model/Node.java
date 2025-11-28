@@ -2,6 +2,7 @@ package pt.unl.fct.pds.model;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 public class Node {
     private String nickname;
@@ -9,6 +10,7 @@ public class Node {
     private String digest;
     private LocalDateTime timePublished;
     private String ipAddress;
+    private List<String> family;
     private int orPort;
     private int dirPort;
     private String[] flags;
@@ -33,7 +35,8 @@ public class Node {
                 int bandwidth,
                 String country,
                 String exitPolicy,
-                String ipv6Address)
+                String ipv6Address,
+                List<String> family)
     {
         this.nickname = nickname;
         this.fingerprint = fingerprint;
@@ -48,6 +51,7 @@ public class Node {
         this.country = country;
         this.exitPolicy = exitPolicy;
         this.ipv6Address = ipv6Address;
+        this.family = family;
     }
 
     public String getNickname() {return nickname;}
@@ -63,6 +67,7 @@ public class Node {
     public String getCountry() {return country;}
     public String getExitPolicy() {return exitPolicy;}
     public String getIpv6Address() {return ipv6Address;}
+    public List<String> getFamily () {return family;}
 
     
     public void setNickname(String nickname) {this.nickname = nickname;}
@@ -78,4 +83,5 @@ public class Node {
     public void setCountry(String country) {this.country = country;}
     public void setExitPolicy(String exitPolicy) {this.exitPolicy = exitPolicy;}
     public void setIpv6Address(String ipv6Address) {this.ipv6Address = ipv6Address;}
+    public void setFamily(List<String> family) {this.family = family;}
 }

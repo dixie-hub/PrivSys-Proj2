@@ -63,10 +63,13 @@ public class AdvancedSelector {
         List<Node> guardNodes = parser.filterByFlag("Guard");
         // TODO: remove those with the same family
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
+        List<Node> guardNodesFilterd = filterByFamily(exit, guardNodes);
+
+
 
         double totalWeight = 0.0;
         double currWeight = 0.0;
-        for (Node node : guardNodes) {
+        for (Node node : guardNodesFilterd) {
             if (!node.getCountry().equals(exit.getCountry())) 
                 currWeight = node.getBandwidth() * (1 + ALPHA);   
             else 
@@ -76,7 +79,7 @@ public class AdvancedSelector {
             weight.put(node, currWeight);
         }
 
-        return sampleByWeight(guardNodes, totalWeight);
+        return sampleByWeight(guardNodesFilterd, totalWeight);
     }
 
     private Node selectMiddle() {
@@ -84,13 +87,19 @@ public class AdvancedSelector {
         // TODO: Filter relays to remove those with the same family
         fastNodes.removeIf(node -> parser.sameSubnet(node, exit) || parser.sameSubnet(node, guard));
 
+        List<Node> middleFilteredExit = filterByFamily(exit, fastNodes);
+        List<Node> middleFilteredGuard = filterByFamily(guard, middleFilteredExit);
+
+
+
+
         double totalWeight = 0.0;
         double currWeight = 0.0;
         int c = 0;
         String guardCountry = guard.getCountry();
         String exitCountry = exit.getCountry();
         
-        for (Node node : fastNodes) {
+        for (Node node : middleFilteredGuard) {
             String nodeCountry = node.getCountry();
 
             if (!nodeCountry.equals(guardCountry) && !guardCountry.equals(exitCountry) && !nodeCountry.equals(exitCountry))
@@ -104,7 +113,7 @@ public class AdvancedSelector {
             totalWeight += currWeight;           
             weight.put(node, currWeight);
         }
-        return sampleByWeight(fastNodes, totalWeight);
+        return sampleByWeight(middleFilteredGuard, totalWeight);
     }
 
     private Node sampleByWeight(List<Node> nodes, double totalWeight) {
@@ -120,5 +129,18 @@ public class AdvancedSelector {
             }
         }
         return null;
+    }
+
+    private List<Node> filterByFamily(Node node, List<Node> nodes){ 
+        List<String> nodeFamily = node.getFamily();
+        List<Node> result = new ArrayList<>();
+
+        for (Node n : nodes){
+            List<String> currentFamily = n.getFamily();
+            if (currentFamily == null || nodeFamily == null || !nodeFamily.stream().anyMatch(currentFamily::contains)) {
+                result.add(n);
+            }
+        }
+        return result;
     }
 }

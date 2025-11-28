@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+       <!ENTITY base SYSTEM "src/build/java/base.xml">
+]>
+
+<project default="usage" name="metrics-lib" basedir="."
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <property name="release.version" value="2.9.1" />
+  <property name="javadoc-title" value="Tor Metrics Library API Documentation"/>
+  <property name="javadoc-excludes" value="**/impl/** **/index/** **/internal/** **/log/**" />
+  <property name="implementation-title" value="Tor Metrics Library" />
+  <property name="name" value="metrics-lib" />
+  <property name="jarpatternprop" value="empty" />
+
+  <patternset id="runtime" >
+      <include name="commons-codec-1.10.jar"/>
+      <include name="commons-compress-1.13.jar"/>
+      <include name="jackson-annotations-2.8.6.jar"/>
+      <include name="jackson-core-2.8.6.jar"/>
+      <include name="jackson-databind-2.8.6.jar"/>
+      <include name="slf4j-api-1.7.22.jar" />
+      <include name="xz-1.6.jar"/>
+  </patternset>
+
+  <target name="coverage-check">
+      <cobertura-check totallinerate="58" totalbranchrate="50" >
+      <regex pattern="org.torproject.descriptor.benchmark.*"
+             linerate="0" branchrate="0"/>
+      <regex pattern="org.torproject.descriptor.index"
+             linerate="97" branchrate="62"/>
+      <regex pattern="org.torproject.descriptor.DescriptorSourceFactory"
+             linerate="100" branchrate="77"/>
+      <regex pattern="org.torproject.descriptor.index.DescriptorIndexCollector"
+             linerate="92" branchrate="61"/>
+      <regex pattern="org.torproject.descriptor.index.IndexNode"
+             linerate="100" branchrate="61"/>
+      <regex pattern="org.torproject.descriptor.index.FileNode"
+             linerate="100" branchrate="100"/>
+      <regex pattern="org.torproject.descriptor.index.DirectoryNode"
+             linerate="100" branchrate="100"/>
+    </cobertura-check>
+  </target>
+
+  <target name="benchmark" depends="compile,testcompile">
+    <java fork="true"
+          maxmemory="2048m"
+          classname="org.torproject.descriptor.benchmark.MeasurePerformance">
+      <classpath refid="test.classpath"/>
+    </java>
+  </target>
+
+  <!-- The following line adds the common targets and properties
+       for Metrics' Java Projects.
+  -->
+  &base;
+
+</project>

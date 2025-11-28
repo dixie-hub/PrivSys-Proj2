@@ -47,18 +47,19 @@ public class SimpleSelector {
 
     private Node selectGuard() {
         List<Node> guardNodes = parser.filterByFlag("Guard");
-        // TODO: remove those with the same family
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
+        List<Node> guardNodesFilterd = filterByFamily(exit, guardNodes);
 
-        return sampleByWeight(guardNodes);
+        return sampleByWeight(guardNodesFilterd);
     }
 
     private Node selectMiddle() {
         List<Node> fastNodes = parser.filterByFlag("Fast");
-        // TODO: Filter relays to remove those with the same family
         fastNodes.removeIf(node -> parser.sameSubnet(node, exit) || parser.sameSubnet(node, guard));
+        List<Node> middleFilteredExit = filterByFamily(exit, fastNodes);
+        List<Node> middleFilteredGuard = filterByFamily(guard, middleFilteredExit);
 
-        return sampleByWeight(fastNodes);
+        return sampleByWeight(middleFilteredGuard);
     }
 
     private Node sampleByWeight(List<Node> nodes) {
@@ -78,5 +79,18 @@ public class SimpleSelector {
             }
         }
         return null;
+    }
+
+    private List<Node> filterByFamily(Node node, List<Node> nodes){ 
+        List<String> nodeFamily = node.getFamily();
+        List<Node> result = new ArrayList<>();
+
+        for (Node n : nodes){
+            List<String> currentFamily = n.getFamily();
+            if (currentFamily == null || nodeFamily == null || !nodeFamily.stream().anyMatch(currentFamily::contains)) {
+                result.add(n);
+            }
+        }
+        return result;
     }
 }
