@@ -61,12 +61,10 @@ public class ConsensusParser {
         Map<String, List<String>> fingerprintToFamily = new HashMap<>();
 
         for (Descriptor descriptor : descriptorReader.readDescriptors(new File("in"))) {
-            // Only process network status consensuses, ignore the rest.
             if ((descriptor instanceof RelayServerDescriptor)) {
-                RelayServerDescriptor  rsd  = (RelayServerDescriptor ) descriptor;
+                RelayServerDescriptor  rsd  = (RelayServerDescriptor) descriptor;
                 
                 String fingerprintHex = rsd.getFingerprint(); 
-                System.out.println(fingerprintHex);
                 List<String> family = rsd.getFamilyEntries();   
 
                 fingerprintToFamily.put(fingerprintHex, family);
