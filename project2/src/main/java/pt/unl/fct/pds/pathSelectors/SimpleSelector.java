@@ -7,7 +7,7 @@ import java.util.Random;
 import pt.unl.fct.pds.model.Node;
 import pt.unl.fct.pds.utils.ConsensusParser;
 
-public class SimpleSelector {
+public class SimpleSelector implements Selector {
 
     public ConsensusParser parser;
     private List<Node> consensus;
@@ -40,13 +40,13 @@ public class SimpleSelector {
     }
 
     private Node selectExit() {
-        List<Node> fastNodes = parser.filterByFlag("Fast");
+        List<Node> fastNodes = new ArrayList(parser.filterByFlag("Fast"));
         fastNodes.removeIf(node -> !node.getExitPolicy().contains("accept"));
         return sampleByWeight(fastNodes);
     }
 
     private Node selectGuard() {
-        List<Node> guardNodes = parser.filterByFlag("Guard");
+        List<Node> guardNodes = new ArrayList(parser.filterByFlag("Guard"));
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
         List<Node> guardNodesFilterd = filterByFamily(exit, guardNodes);
 
@@ -54,7 +54,7 @@ public class SimpleSelector {
     }
 
     private Node selectMiddle() {
-        List<Node> fastNodes = parser.filterByFlag("Fast");
+        List<Node> fastNodes = new ArrayList(parser.filterByFlag("Fast"));
         fastNodes.removeIf(node -> parser.sameSubnet(node, exit) || parser.sameSubnet(node, guard));
         List<Node> middleFilteredExit = filterByFamily(exit, fastNodes);
         List<Node> middleFilteredGuard = filterByFamily(guard, middleFilteredExit);
@@ -78,6 +78,8 @@ public class SimpleSelector {
                 return node;
             }
         }
+
+
         return null;
     }
 

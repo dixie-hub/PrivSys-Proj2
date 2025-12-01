@@ -157,7 +157,6 @@ public class ConsensusParser {
                             relay = new Node();
                             break;
                         default:
-                            System.out.println("Invalid input.");
                             break;
                     }
                 }

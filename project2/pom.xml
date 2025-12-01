@@ -56,6 +56,11 @@
             <version>4.2.0</version>
         </dependency>
         <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.torproject</groupId>
             <artifactId>metrics-lib</artifactId>
             <version>2.9.1</version>

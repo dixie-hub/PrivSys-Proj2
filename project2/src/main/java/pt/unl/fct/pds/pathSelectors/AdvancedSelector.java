@@ -8,7 +8,7 @@ import java.util.Random;
 import pt.unl.fct.pds.model.Node;
 import pt.unl.fct.pds.utils.ConsensusParser;
 
-public class AdvancedSelector {
+public class AdvancedSelector implements Selector {
 
     public ConsensusParser parser;
     public Node exit;
@@ -17,8 +17,8 @@ public class AdvancedSelector {
     private Random random;
     
     private Map<Node, Double> weight;
-    private static Double ALPHA = 0.1;
-    private static Double BETA = 0.1; 
+    private static Double ALPHA = 10.0;
+    private static Double BETA = 1.0; 
 
     public AdvancedSelector(ConsensusParser parser) {
         this.parser = parser;
@@ -44,7 +44,7 @@ public class AdvancedSelector {
     }
 
     private Node selectExit() {
-        List<Node> fastNodes = parser.filterByFlag("Fast");
+        List<Node> fastNodes = new ArrayList(parser.filterByFlag("Fast"));
         fastNodes.removeIf(node -> !node.getExitPolicy().contains("accept"));
 
         double totalWeight = 0.0;
@@ -60,8 +60,7 @@ public class AdvancedSelector {
     }
 
     private Node selectGuard() {
-        List<Node> guardNodes = parser.filterByFlag("Guard");
-        // TODO: remove those with the same family
+        List<Node> guardNodes = new ArrayList(parser.filterByFlag("Guard"));
         guardNodes.removeIf(node -> parser.sameSubnet(node, exit));
         List<Node> guardNodesFilterd = filterByFamily(exit, guardNodes);
 
@@ -83,15 +82,11 @@ public class AdvancedSelector {
     }
 
     private Node selectMiddle() {
-        List<Node> fastNodes = parser.filterByFlag("Fast");
-        // TODO: Filter relays to remove those with the same family
+        List<Node> fastNodes = new ArrayList(parser.filterByFlag("Fast"));
         fastNodes.removeIf(node -> parser.sameSubnet(node, exit) || parser.sameSubnet(node, guard));
 
         List<Node> middleFilteredExit = filterByFamily(exit, fastNodes);
         List<Node> middleFilteredGuard = filterByFamily(guard, middleFilteredExit);
-
-
-
 
         double totalWeight = 0.0;
         double currWeight = 0.0;

@@ -3,4 +3,6 @@ pt/unl/fct/pds/pathSelectors/AdvancedSelector.class
 pt/unl/fct/pds/model/Node.class
 pt/unl/fct/pds/model/Circuit.class
 pt/unl/fct/pds/utils/ConsensusParser.class
+pt/unl/fct/pds/utils/LineChart.class
 pt/unl/fct/pds/pathSelectors/SimpleSelector.class
+pt/unl/fct/pds/pathSelectors/Selector.class
