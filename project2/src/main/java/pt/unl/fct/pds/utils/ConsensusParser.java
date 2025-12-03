@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,6 +16,12 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
@@ -28,30 +33,25 @@ public class ConsensusParser {
     private static String FILE_NAME = "relays.txt";
     private final DatabaseReader dbReader;
     private Map<String, List<Node>> flagMap;
+    private Path serverDescriptorsPath;
+    private static String serverDescriptorsUrl = "http://217.196.147.77/tor/server/all";
 
-    public ConsensusParser() throws IOException {
+    public ConsensusParser() throws IOException, InterruptedException {
         InputStream database = getClass()
             .getClassLoader()
             .getResourceAsStream("GeoLite2-City.mmdb");
 
         this.dbReader = new DatabaseReader.Builder(database).build();
         this.flagMap = new HashMap<>();
+        this.serverDescriptorsPath = Paths.get("server_descriptors.txt");
 
-         DescriptorCollector descriptorCollector =
-            DescriptorSourceFactory.createDescriptorCollector();
-            descriptorCollector.collectDescriptors(
-            // Download from Tor's main CollecTor instance,
-            "https://collector.torproject.org",
-            // include network status consensuses and relay server descriptors
-            new String[] { "/recent/relay-descriptors/consensuses/",
-            "/recent/relay-descriptors/server-descriptors/" },
-            // regardless of last-modified time,
-            0L,
-            // write to the local directory called in/,
-            new File("in"),
-            // and delete extraneous files that do not exist remotely anymore.
-            true);
+        HttpClient client = HttpClient.newHttpClient();
 
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(serverDescriptorsUrl)).GET().build();
+
+        HttpResponse<Path> response = client.send(request, HttpResponse.BodyHandlers.ofFile(serverDescriptorsPath));
+        
+        System.out.println("Request response : " + response.statusCode());
     }
 
     public List<Node> parseConsensus() {
@@ -60,7 +60,7 @@ public class ConsensusParser {
 
         Map<String, List<String>> fingerprintToFamily = new HashMap<>();
 
-        for (Descriptor descriptor : descriptorReader.readDescriptors(new File("in"))) {
+        for (Descriptor descriptor : descriptorReader.readDescriptors(serverDescriptorsPath.toFile())) {
             if ((descriptor instanceof RelayServerDescriptor)) {
                 RelayServerDescriptor  rsd  = (RelayServerDescriptor) descriptor;
                 
@@ -70,19 +70,6 @@ public class ConsensusParser {
                 fingerprintToFamily.put(fingerprintHex, family);
             }
         }
-
-
-
-        /*
-         * STEP 1
-         * -> Ler o document e retirar as informações importantes
-         * STEP 2
-         * -> Usar uma função de geo location para retirar o pais do relay observado
-         * STEP 3
-         * -> Criar um objeto Node para guardar as informações dos relays
-         * STEP 4
-         * -> Colocar tudo numa lista de devolver essa lista
-         */
 
         InputStream file = getClass().getClassLoader().getResourceAsStream(FILE_NAME);
 

@@ -17,8 +17,8 @@ public class AdvancedSelector implements Selector {
     private Random random;
     
     private Map<Node, Double> weight;
-    private static Double ALPHA = 10.0;
-    private static Double BETA = 1.0; 
+    private static Double ALPHA = 1000.0;
+    private static Double BETA = 10.0; 
 
     public AdvancedSelector(ConsensusParser parser) {
         this.parser = parser;

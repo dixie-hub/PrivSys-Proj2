@@ -23,6 +23,7 @@ public class Project2 {
 
     public static List<Integer> simpleBandwidth;
     public static List<Integer> advancedBandwidth;
+    public static int NR_TESTS = 100; 
 
     public static void main(String[] args) {
         // Here we write our logic to choose circuits!
@@ -32,7 +33,6 @@ public class Project2 {
             ConsensusParser parser = new ConsensusParser();
             List<Node> consensus = parser.parseConsensus();
 
-            int nrTests = 1000;
 
             simpleBandwidth = new ArrayList<>();
             advancedBandwidth = new ArrayList<>();
@@ -51,7 +51,7 @@ public class Project2 {
                     text = "Given entropy values for the advanced relay selector: ";
                 }
                     
-                List<Double> entropies = getShannonEntropy(selector, nrTests);
+                List<Double> entropies = getShannonEntropy(selector, NR_TESTS);
 
                 System.out.println(text);
                 for (int f = 0; f < 4; f++) {
@@ -109,7 +109,6 @@ public class Project2 {
                 probExit.put(n, exit.get(n) / (double) nrCircuits);
         }
 
-        double sum;
         List<Double> entropy = new ArrayList<>(4);
 
         entropy.add(calculateEntropy(probTotal));
